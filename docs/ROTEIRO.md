@@ -14,6 +14,7 @@ Evidência: leituras enviadas pelo autor no diário. Limite: apenas um sensor/va
 
 ## 2. Wi-Fi e telemetria — próximo marco
 
+- [ ] Validar firmware preparado de Wi-Fi e página local no celular: [T004](testes/T004-wifi-local.md).
 - [ ] Selecionar hospedagem, API e banco.
 - [ ] Conectar o ESP32 à rede e reconectar após falha.
 - [ ] Identificar controlador e sensor de forma estável.

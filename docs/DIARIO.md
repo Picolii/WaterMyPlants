@@ -31,7 +31,7 @@ Os resultados abaixo foram relatados pelo autor durante os testes físicos em 19
 
 ## T003 — Índice relativo e mudança de posição
 
-**Código:** média de 20 amostras espaçadas por 10 ms, intervalo final de 800 ms; `indice = 100 × (3060 − leitura) / (3060 − 2107)`, limitado a 0–100%. Preservado em [`main.cpp`](../firmware/esp32/src/main.cpp).
+**Código:** média de 20 amostras espaçadas por 10 ms, intervalo final de 800 ms; `indice = 100 × (3060 − leitura) / (3060 − 2107)`, limitado a 0–100%. Versão desse experimento preservada em [`indice-relativo.cpp`](../firmware/exemplos/indice-relativo.cpp). O `main.cpp` atual evolui para o teste de Wi-Fi.
 
 | Contexto informado | Leituras enviadas |
 |---|---|
@@ -57,4 +57,4 @@ Os resultados abaixo foram relatados pelo autor durante os testes físicos em 19
 
 ## Próximo experimento
 
-T004 proposto: conexão Wi-Fi e telemetria. Registrar configuração sem credenciais, versão do firmware, rede disponível/indisponível e evidência de persistência da leitura no backend. Não marcar como concluído antes do teste.
+T004 preparado: conexão Wi-Fi e página local de leitura no celular, antes de integrar telemetria na nuvem. O autor confirmou rede de 2,4 GHz disponível. Credenciais em arquivo local ignorado pelo Git; leitura serial preservada e amostragem por temporização sem espera por conexão. Procedimento e casos de falha em [T004-wifi-local.md](testes/T004-wifi-local.md). Teste físico pendente; nenhum resultado de conectividade foi informado ainda. Persistência no backend será teste posterior.

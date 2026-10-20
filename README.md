@@ -13,7 +13,9 @@ Projeto em construção, documentado desde o primeiro sensor conectado: componen
 - [x] Média de 20 amostras e exibição de índice relativo entre 0 e 100%.
 - [x] Resultados dos primeiros testes registrados.
 
-**Ainda não implementados:** Wi-Fi, API, banco, painel, QR Codes, câmera, análise por IA e acionamento da bomba. O teste atual foi executado pelo autor no hardware; não há validação de irrigação automática.
+**Próximo teste preparado:** conexão Wi-Fi e página local para ver a leitura pelo celular; validação física pendente. Veja o [passo a passo do T004](docs/testes/T004-wifi-local.md).
+
+**Ainda não implementados:** API na nuvem, banco, painel completo, QR Codes, câmera, análise por IA e acionamento da bomba. O teste inicial do sensor foi executado pelo autor no hardware; não há validação de irrigação automática.
 
 ## Visão do projeto
 
@@ -50,6 +52,7 @@ Neste teste, o ESP32 recebe energia pelo USB do computador. Relé, bomba e carre
 
 1. Abra a pasta [`firmware/esp32`](firmware/esp32) como projeto no PlatformIO.
 2. O perfil usado é **Espressif ESP32 Dev Module** (`esp32dev`), com framework **Arduino**.
+   Para habilitar o Wi-Fi da versão atual, copie `include/secrets.example.h` para `include/secrets.h` e preencha suas credenciais somente nesse arquivo local. Sem configuração, a leitura serial continua disponível.
 3. Compile com **Build** e grave com **Upload**.
 4. Abra o **Monitor Serial em 115200 baud**.
 5. Compare leituras na terra seca e úmida, mantendo a mesma profundidade e sem tocar na haste.
@@ -90,7 +93,7 @@ O módulo atual tem dois canais de relé, mas há apenas um sensor e uma bomba d
 
 ## Próxima etapa
 
-Conectar o ESP32 ao Wi-Fi e definir a API e o armazenamento das leituras. Em seguida, construir o painel por planta, com histórico e estado de conexão. O controle da bomba será testado depois de confirmar alimentação, corrente e compatibilidade do relé.
+Validar o firmware de Wi-Fi e a página local no celular seguindo o [T004](docs/testes/T004-wifi-local.md). Depois definir a API e o armazenamento das leituras e construir o painel por planta, com histórico e estado de conexão. O controle da bomba será testado depois de confirmar alimentação, corrente e compatibilidade do relé.
 
 ## Referências técnicas
 
