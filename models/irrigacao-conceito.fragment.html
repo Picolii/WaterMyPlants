@@ -1,0 +1,88 @@
+<div id="irrigacao-modelo">
+  <div class="viz-controls">
+    <label class="form-label">Inspecionar<select class="form-select" id="ir-item"></select></label>
+    <label class="form-label">Rotação<input class="form-range" id="ir-angle" type="range" min="-70" max="70" value="-15"></label>
+    <label class="form-check"><input class="form-check-input" id="ir-explode" type="checkbox"><span class="form-check-label">Separar módulos</span></label>
+    <label class="form-check"><input class="form-check-input" id="ir-pump" type="checkbox"><span class="form-check-label">Simular relé acionado</span></label>
+  </div>
+  <div class="text-small">Estudo 3D conceitual · sem escala · posições dos pinos ilustrativas · tracejado = ligação pendente</div>
+  <svg id="ir-scene" role="img" aria-label="Modelo tridimensional de irrigação com ESP32, sensor, relé, bomba e fios selecionáveis"></svg>
+  <div class="card" aria-live="polite"><strong id="ir-name"></strong><div id="ir-detail"></div></div>
+  <div class="text-small" id="ir-state"></div>
+</div>
+<style>
+#irrigacao-modelo{color:var(--foreground)}
+#irrigacao-modelo #ir-scene{display:block;width:100%;height:420px;touch-action:pan-y}
+#irrigacao-modelo svg text{fill:var(--foreground);paint-order:stroke;stroke:var(--background);stroke-width:3px;stroke-linejoin:round;font-weight:400}
+#irrigacao-modelo .ir-face{stroke:var(--border);stroke-width:1}
+#irrigacao-modelo .ir-port{fill:var(--foreground);stroke:var(--background);stroke-width:1}
+#irrigacao-modelo .ir-wire{fill:none;stroke-linejoin:round;stroke-linecap:round}
+#irrigacao-modelo .ir-hit{fill:none;stroke:transparent;stroke-width:16}
+#irrigacao-modelo #ir-state{margin-top:10px}
+@media(max-width:450px){#irrigacao-modelo #ir-scene{height:370px}}
+</style>
+<script>
+(() => {
+ const root=document.getElementById('irrigacao-modelo'), $=id=>root.querySelector('#'+id), NS='http://www.w3.org/2000/svg';
+ const modules=[
+  {id:'esp',name:'ESP32',p:[-160,0,0],s:[86,110,12],color:'--viz-series-1',detail:'Controlador • lógica de 3,3 V • alimentação inicial por microUSB. GPIO34 proposto para a leitura analógica; GPIO26 proposto para comando. Confirmar variante e serigrafia da placa. Consumo da placa ainda não medido.'},
+  {id:'sensor',name:'Sensor de solo',p:[-160,155,0],s:[35,95,6],color:'--viz-series-1',detail:'VCC → 3V3; GND → GND; AOUT → GPIO34. Saída declarada: 0–3,0 V. Corrente deste exemplar desconhecida. Calibrar no solo seco e úmido. Apenas a haste entra no solo; conector e eletrônica ficam secos.'},
+  {id:'relay',name:'Relé × 2',p:[70,0,0],s:[100,96,28],color:'--viz-series-2',detail:'VCC: 5 V; GND: retorno; IN1: comando a validar; IN2: sem uso. Contatos do canal 1: COM recebe +5 V e NO alimenta a bomba; NC fica livre. Canal 2 livre. Corrente do módulo e compatibilidade com 3,3 V ainda não confirmadas.'},
+  {id:'interface',name:'Interface a definir',p:[-42,-75,0],s:[58,42,12],color:'--viz-series-2',detail:'Bloco reservado para adaptação entre GPIO26 (3,3 V) e IN1 do relé. Pode ser dispensável, ou exigir transistor/driver e resistores, conforme o circuito do módulo. Não representa uma peça já disponível nem ligação pronta para energizar.'},
+  {id:'supply',name:'Fonte 5 V • proposta',p:[70,-165,0],s:[100,50,26],color:'--viz-series-3',detail:'Fonte DC regulada de 5 V proposta para relé e bomba, com ramificações próprias. Corrente nominal, fusível e bitola só podem ser dimensionados após conhecer consumo e partida da bomba. ESP32 inicialmente alimentado por USB, com GND comum.'},
+  {id:'pump',name:'Bomba 3–5 V',p:[240,95,0],s:[65,64,48],color:'--viz-series-3',detail:'Motor brushless de 3–5 V informado pelo usuário. Positivo vem de NO1; negativo volta direto à fonte. Correntes de operação e partida desconhecidas. Confirmar se é submersível e a proteção exigida pelo fabricante. Nunca alimentar por um GPIO.'},
+  {id:'pot',name:'Vaso / destino',p:[130,225,0],s:[98,80,55],color:'--viz-series-4',detail:'Destino da mangueira e da haste do sensor. Separar a saída de água do ponto de leitura para evitar leituras locais enganosas. Dimensões e posição finais dependem do vaso, reservatório e altura de bombeamento.'}
+ ];
+ const ports={a:['esp',[-43,-25,12],'3V3'],b:['esp',[-43,5,12],'GND'],c:['esp',[-43,35,12],'34'],d:['esp',[43,-30,12],'26'],e:['esp',[0,-55,12],'USB'],f:['sensor',[-17,-47,6],'VCC'],g:['sensor',[0,-47,6],'GND'],h:['sensor',[17,-47,6],'AOUT'],i:['relay',[-50,-32,28],'VCC'],j:['relay',[-50,-8,28],'GND'],k:['relay',[-50,18,28],'IN1'],l:['relay',[50,-22,28],'COM1'],m:['relay',[50,22,28],'NO1'],n:['supply',[-25,25,26],'+5'],o:['supply',[25,25,26],'−'],p:['pump',[-32,-15,48],'+'],q:['pump',[-32,15,48],'−'],r:['interface',[-29,0,12],'SIG'],s:['interface',[29,0,12],'OUT'],t:['interface',[0,21,12],'GND']};
+ const wires=[
+ ['w1','F01 • 3V3 → VCC sensor','a','f',1,'3,3 V DC • alimentação do sensor • corrente desconhecida • cor sugerida: vermelho.'],
+ ['w2','F02 • GND → GND sensor','b','g',0,'0 V de referência • retorno do sensor • mesma corrente do ramo de alimentação • cor sugerida: preto.'],
+ ['w3','F03 • AOUT → GPIO34','h','c',4,'Sinal analógico declarado de 0–3,0 V • leitura de umidade; não alimenta a bomba. Corrente de sinal não medida • cor sugerida: amarelo.'],
+ ['w4','F04 • +5 V → VCC relé','n','i',1,'5 V DC propostos • alimenta o módulo de relés • corrente do módulo a confirmar • cor sugerida: vermelho.'],
+ ['w5','F05 • fonte − → GND relé','o','j',0,'Retorno da alimentação do módulo de relés • corrente a medir • cor sugerida: preto.'],
+ ['w6','F06 • ESP32 GND → fonte −','b','o',0,'Referência comum entre controle e fonte externa • este fio não deve ser o retorno de potência da bomba • cor sugerida: preto.'],
+ ['w7','F07 • +5 V → COM1','n','l',1,'Ramo de potência • 5 V DC propostos • conduz a corrente da bomba quando o contato fecha; corrente de partida e fusível pendentes • cor sugerida: vermelho.'],
+ ['w8','F08 • NO1 → bomba +','m','p',3,'Relé aberto: sem alimentação da bomba. Relé fechado: aproximadamente 5 V em relação ao negativo da fonte, menos as quedas nos fios/contato. Corrente da bomba desconhecida • cor sugerida: laranja.'],
+ ['w9','F09 • bomba − → fonte −','q','o',0,'Retorno direto de potência • mesma corrente do ramo da bomba • não passar pelo ESP32 • cor sugerida: preto.'],
+ ['w10','F10 • GPIO26 → interface','d','r',2,'PENDENTE • comando lógico de 0/3,3 V • circuito e corrente de entrada da interface a definir • cor sugerida: azul.',true],
+ ['w11','F11 • interface → IN1','s','k',2,'PENDENTE • nível ativo, tensão e circuito dependem do módulo de relé. Não conectar IN1 diretamente ao ESP32 antes da verificação • cor sugerida: azul.',true],
+ ['w12','F12 • GND interface → fonte −','t','o',0,'PENDENTE • retorno da interface, caso necessária • corrente depende do circuito escolhido • cor sugerida: preto.',true]
+ ];
+ const items=[...modules.map(m=>[m.id,m.name,m.detail]),...wires.map(w=>[w[0],w[1],w[5]])];
+ const select=$('ir-item');items.forEach(i=>{const o=document.createElement('option');o.value=i[0];o.textContent=i[1];select.append(o)});
+ let angle=-15, exploded=false,on=false,chosen='esp';
+ function restore(s){const p=s?.privateContent;if(!p)return;if(items.some(i=>i[0]===p.chosen))chosen=p.chosen;angle=Math.max(-70,Math.min(70,Number(p.angle)||0));exploded=!!p.exploded;on=!!p.on;sync()}
+ function sync(){select.value=chosen;$('ir-angle').value=angle;$('ir-explode').checked=exploded;$('ir-pump').checked=on}
+ function save(){window.openai?.setWidgetState?.({modelContent:{item:items.find(i=>i[0]===chosen)?.[1],releSimulado:on,modelo:'conceitual; pinagem e correntes pendentes'},privateContent:{chosen,angle,exploded,on}})?.catch(()=>{})}
+ function el(t,a,text){const e=document.createElementNS(NS,t);Object.entries(a||{}).forEach(([k,v])=>e.setAttribute(k,v));if(text)e.textContent=text;return e}
+ const pos=m=>[m.p[0]*(exploded?1.2:1),m.p[1]*(exploded?1.2:1),m.p[2]+(exploded?m.id==='esp'?30:m.id==='relay'?55:0:0)];
+ function port(k){const [id,d]=ports[k],p=pos(modules.find(m=>m.id===id));return p.map((v,i)=>v+d[i])}
+ function draw(){
+ const svg=$('ir-scene'),width=svg.clientWidth||700,height=svg.clientHeight||420;svg.setAttribute('viewBox',`0 0 ${width} ${height}`);svg.replaceChildren();
+ const rad=angle*Math.PI/180,co=Math.cos(rad),si=Math.sin(rad);
+ const raw=([x,y,z])=>[(x*co-y*si),(x*si+y*co)*.58-z];
+ const coords=modules.flatMap(m=>{const p=pos(m);return [-1,1].flatMap(x=>[-1,1].flatMap(y=>[0,1].map(z=>raw([p[0]+x*m.s[0]/2,p[1]+y*m.s[1]/2,p[2]+z*m.s[2]]))))});
+ const xmin=Math.min(...coords.map(p=>p[0]))-55,xmax=Math.max(...coords.map(p=>p[0]))+55,ymin=Math.min(...coords.map(p=>p[1]))-40,ymax=Math.max(...coords.map(p=>p[1]))+40;
+ const scale=Math.min(width/(xmax-xmin),height/(ymax-ymin));
+ const proj=p=>{const [x,y]=raw(p);return [(x-(xmin+xmax)/2)*scale+width/2,(y-(ymin+ymax)/2)*scale+height/2]};
+ const path=ps=>ps.map((p,i)=>(i?'L':'M')+proj(p).join(',')).join(' ');
+ function pick(id){chosen=id;sync();draw();save()}
+ const sorted=[...modules].sort((a,b)=>raw(pos(a))[1]-raw(pos(b))[1]);
+ sorted.forEach(m=>{const p=pos(m),[w,d,h]=m.s;const cs=[[-w/2,-d/2,0],[w/2,-d/2,0],[w/2,d/2,0],[-w/2,d/2,0],[-w/2,-d/2,h],[w/2,-d/2,h],[w/2,d/2,h],[-w/2,d/2,h]].map(c=>c.map((v,i)=>v+p[i]));
+ const g=el('g',{'class':'cursor-interaction','aria-label':m.name});
+ [[0,1,5,4],[1,2,6,5],[2,3,7,6],[4,5,6,7]].forEach((face,i)=>g.append(el('path',{d:path(face.map(j=>cs[j]))+' Z',class:'ir-face',fill:`var(${m.color})`,'fill-opacity':chosen===m.id?.5:(i===3?.2:.12)})));
+ if(m.id==='relay'){[[-22,0],[22,0]].forEach(([x,y])=>g.append(el('path',{d:path([[p[0]+x-14,p[1]+y-20,p[2]+h+4],[p[0]+x+14,p[1]+y-20,p[2]+h+4],[p[0]+x+14,p[1]+y+15,p[2]+h+4],[p[0]+x-14,p[1]+y+15,p[2]+h+4]])+' Z',fill:'var(--viz-series-2)','fill-opacity':.45})));}
+ const lp=proj([p[0],p[1]-d/2-15,p[2]+h]);g.append(el('text',{x:lp[0],y:lp[1],'text-anchor':'middle'},m.name));g.addEventListener('click',()=>pick(m.id));svg.append(g);
+ });
+ const colors=['var(--foreground)','var(--viz-series-1)','var(--viz-series-2)','var(--viz-series-3)','var(--viz-series-4)'];
+ wires.forEach((w,index)=>{const a=port(w[2]),b=port(w[3]),lift=22+(index%4)*12,ps=[a,[a[0],a[1],a[2]+lift],[b[0],b[1],b[2]+lift],b],g=el('g',{class:'cursor-interaction'});g.append(el('path',{d:path(ps),class:'ir-wire',stroke:colors[w[4]],'stroke-width':chosen===w[0]?4:2,'stroke-opacity':chosen===w[0]?1:.58,...(w[6]?{'stroke-dasharray':'6 5'}:{})}));const hit=el('path',{d:path(ps),class:'ir-hit'});hit.addEventListener('click',()=>pick(w[0]));g.append(hit);svg.append(g)});
+ Object.entries(ports).forEach(([id,v])=>{const p=proj(port(id)),active=chosen===v[0]||wires.some(w=>w[0]===chosen&&(w[2]===id||w[3]===id));svg.append(el('circle',{cx:p[0],cy:p[1],r:active?4:2.5,class:'ir-port'}));if(active)svg.append(el('text',{x:p[0]+7,y:p[1]-7},v[2]));});
+ const ma=port('l'),mb=port('m');if(on)svg.append(el('path',{d:path([ma,mb]),class:'ir-wire',stroke:'var(--viz-series-3)','stroke-width':4}));
+ const pp=pos(modules.find(m=>m.id==='pump')),vp=pos(modules.find(m=>m.id==='pot'));
+ svg.append(el('path',{d:path([[pp[0]+32,pp[1],pp[2]+40],[pp[0]+75,pp[1],80],[vp[0],vp[1],85],[vp[0],vp[1],55]]),class:'ir-wire',stroke:'var(--viz-series-4)','stroke-width':5,'stroke-opacity':.55}));
+ const item=items.find(i=>i[0]===chosen);$('ir-name').textContent=item[1];$('ir-detail').textContent=item[2];$('ir-state').textContent=`Simulação do contato COM1–NO1: ${on?'fechado; bomba alimentada se a fonte estiver presente':'aberto; bomba desligada'}. Mangueira = trajeto ilustrativo. Sem medição elétrica ou controle de hardware.`;
+ }
+ select.addEventListener('change',()=>{chosen=select.value;draw();save()});$('ir-angle').addEventListener('input',e=>{angle=Number(e.target.value);draw()});$('ir-angle').addEventListener('change',save);$('ir-explode').addEventListener('change',e=>{exploded=e.target.checked;draw();save()});$('ir-pump').addEventListener('change',e=>{on=e.target.checked;draw();save()});
+ restore(window.openai?.widgetState);sync();new ResizeObserver(draw).observe($('ir-scene'));draw();window.addEventListener('openai:set_globals',e=>{if(e.detail?.globals?.widgetState){restore(e.detail.globals.widgetState);draw()}});
+})();
+</script>

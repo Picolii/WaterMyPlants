@@ -1,0 +1,18 @@
+# PlatformIO e editores
+.pio/
+.vscode/
+*.code-workspace
+
+# Credenciais locais
+.env
+.env.*
+!.env.example
+secrets.h
+secrets.local.h
+
+# Dependências e saídas locais
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
