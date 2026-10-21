@@ -1,0 +1,14 @@
+{
+  "name": "watermyplants",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Painel independente e firmware do projeto WaterMyPlants.",
+  "scripts": {
+    "start": "node web/painel/serve.mjs",
+    "dev": "node web/painel/serve.mjs",
+    "check": "node --check web/painel/dist/app.js && node --check web/painel/dist/plant-url.js && node --check web/painel/serve.mjs",
+    "test": "node --test web/painel/tests/dashboard.test.mjs"
+  },
+  "engines": { "node": ">=20" }
+}

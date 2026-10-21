@@ -1,4 +1,5 @@
-'use strict';
+import { buildPlantUrl } from './plant-url.js';
+import { createId } from './ids.js';
 
 const STORAGE_KEY = 'watermyplants.dashboard.v1';
 const icons = {
@@ -54,7 +55,7 @@ function persist() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); return true; }
   catch { toast('O navegador não permitiu salvar. Exporte os registros antes de sair.'); return false; }
 }
-function logEvent(title,description) { state.events.unshift({id:crypto.randomUUID(),title,description,at:new Date().toISOString()});state.events = state.events.slice(0,200);persist(); }
+function logEvent(title,description) { state.events.unshift({id:createId(),title,description,at:new Date().toISOString()});state.events = state.events.slice(0,200);persist(); }
 
 // Ilustrações vetoriais próprias: não são fotografias ou evidência de uma câmera.
 function plantArt(type = 'monstera') {
@@ -157,11 +158,11 @@ function renderDetail() {
   if(detailTab==='visao')content=`<div class="detail-metrics"><div><span>Índice relativo ${p.demo?'· exemplo':''}</span><strong>${p.demo?Number(p.relative).toFixed(1)+'%':'—'}</strong><small>${p.demo?'Simulado; não é uma recomendação':'Nenhum sensor vinculado'}</small></div><div><span>Leitura bruta ${p.demo?'· exemplo':''}</span><strong>${p.demo?esc(p.raw):'—'}</strong><small>Sem conexão com hardware</small></div></div><div class="detail-section"><h3>Um pouco sobre ela</h3><p>Substrato: ${esc(p.soil||'Ainda não informado')}</p><p class="detail-notes">${esc(p.notes||'Adicione suas primeiras observações ao editar esta planta.')}</p></div><div class="detail-notice">${p.demo?'Este cadastro e seus valores são exemplos visuais. A leitura real do seu ESP32 continua disponível apenas na página local da placa.':'Este cadastro é local. Leituras reais estarão disponíveis depois da integração com sensores e banco.'}</div><div class="detail-actions"><button class="button primary" data-action="water-note" data-id="${esc(p.id)}">${icon('drop')}Anotar rega manual</button><button class="button" data-action="edit" data-id="${esc(p.id)}">${icon('edit')}Editar planta</button><button class="button" data-action="review" data-id="${esc(p.id)}">${icon('eye')}${p.review?'Retirar marcação':'Marcar para observar'}</button></div><p class="field-note" style="margin-top:12px">Anotar uma rega não liga a bomba nem altera a leitura.</p>`;
   if(detailTab==='cuidados')content=`<div class="detail-section"><h3>Cuidar começa por conhecer.</h3><span class="tag neutral">Perfil ainda não definido</span><p>Espécie cadastrada: <strong>${esc(p.species||'não informada')}</strong>. Ainda não há pesquisa botânica ou IA conectada neste teste.</p><p>As recomendações futuras considerarão espécie, substrato e histórico. Nenhum percentual ideal foi atribuído automaticamente.</p><label for="ai-context">Observações para uma consulta</label><textarea id="ai-context" class="prompt-output" rows="3" placeholder="Ex.: folhas amareladas há três dias, local com pouca luz…"></textarea><div class="detail-actions"><button class="button" data-action="prepare-ai">${icon('spark')}Preparar contexto para consulta</button></div><div id="prepared-context"></div><p class="detail-notice">Esta ação prepara um texto para você revisar e copiar. Não envia dados a um serviço de IA e não faz diagnóstico.</p></div>`;
   if(detailTab==='camera')content=`<div class="unavailable"><span>${icon('camera')}</span><h3>Vamos acompanhar cada nova folha.</h3><p>Nenhuma câmera está vinculada a esta planta. As ilustrações do painel não são fotos capturadas.</p><p>No módulo futuro: uma foto por dia, galeria de evolução, visualização ao vivo e análise assistida das imagens.</p><span class="tag neutral">Hardware e integração pendentes</span></div>`;
-  if(detailTab==='qr')content=`<div class="qr-layout"><div id="qr-code" class="qr-code"></div><div class="detail-section"><h3>A página dela, em um toque.</h3><p>O QR Code abre o endereço desta planta. Ele não contém senha nem comando de rega.</p><p class="qr-url" id="qr-url"></p><button class="button" data-action="download-qr">${icon('download')}Baixar etiqueta SVG</button></div></div><p class="detail-notice">O painel publicado é privado. Em outro dispositivo será necessário entrar na conta autorizada. Plantas criadas neste teste ficam neste navegador; o QR entre dispositivos só terá cadastro sincronizado quando houver banco de dados.</p>`;
+  if(detailTab==='qr')content=`<div class="qr-layout"><div id="qr-code" class="qr-code"></div><div class="detail-section"><h3>A página dela, em um toque.</h3><p>O QR Code abre o endereço desta planta. Ele não contém senha nem comando de rega.</p><p class="qr-url" id="qr-url"></p><button class="button" data-action="download-qr">${icon('download')}Baixar etiqueta SVG</button></div></div><p class="detail-notice">O endereço usa a instalação que você abriu. Se estiver usando localhost, abra pelo IP do computador ou por um domínio acessível antes de gerar uma etiqueta para outro aparelho. Plantas cadastradas ficam neste navegador; a sincronização entre dispositivos dependerá do banco de dados.</p>`;
   $('plant-detail').innerHTML=`<div class="detail-header"><div class="detail-art" style="--plant-bg:${plantBg(p.art)}">${plantArt(p.art)}</div><div><span class="tag ${p.demo?'':'neutral'}">${p.demo?'Planta de demonstração':'Cadastro local'}</span><h2 id="detail-name">${esc(p.name)}</h2><p class="species">${esc(p.species||'Espécie não informada')}</p><div class="location-line">${icon('pin')}${esc(p.location)}</div></div></div><div class="detail-tabs" role="tablist" aria-label="Detalhes da planta">${tabs.map(([key,label])=>`<button role="tab" id="detail-tab-${key}" aria-controls="detail-content" data-detail-tab="${key}" aria-selected="${detailTab===key}">${label}</button>`).join('')}</div><section id="detail-content" role="tabpanel" aria-labelledby="detail-tab-${detailTab}">${content}</section>`;
   if(detailTab==='qr')renderQr(p);
 }
-function plantUrl(p) {const base=location.hostname==='localhost'||location.hostname==='127.0.0.1'?'https://watermyplants-picolii.picoli-b.chatgpt.site/':location.origin+location.pathname;return base+'#planta/'+encodeURIComponent(p.id);}
+function plantUrl(p) { return buildPlantUrl(location.href, p.id); }
 function renderQr(p) {
   const url=plantUrl(p);$('qr-url').textContent=url;
   if(typeof qrcode!=='function'){$('qr-code').textContent='QR indisponível. O endereço da planta está ao lado.';return;}
@@ -201,7 +202,7 @@ $('plant-form').addEventListener('submit',e=>{
   e.preventDefault();const id=$('edit-id').value;const existing=state.plants.find(p=>p.id===id);
   const data={name:$('field-name').value.trim(),species:$('field-species').value.trim(),location:$('field-location').value.trim(),soil:$('field-soil').value.trim(),notes:$('field-notes').value.trim()};
   if(!data.name||!data.location){toast('Preencha o nome e o local da planta.');return;}
-  if(existing)Object.assign(existing,data);else state.plants.push({id:crypto.randomUUID(),...data,demo:false,art:'monstera',review:false});
+  if(existing)Object.assign(existing,data);else state.plants.push({id:createId(),...data,demo:false,art:'monstera',review:false});
   logEvent(existing?'Cadastro atualizado':'Uma nova planta chegou',data.name+' · '+data.location+' · cadastro local.');$('add-dialog').close();renderAll();toast(existing?'Cadastro atualizado.':'Planta adicionada. Ela ainda não tem um sensor vinculado.');
 });
 $('settings-form').addEventListener('submit',e=>{e.preventDefault();const name=$('space-name').value.trim();if(!name)return;state.name=name;persist();setView('configuracoes');toast('Nome do espaço salvo neste navegador.');});

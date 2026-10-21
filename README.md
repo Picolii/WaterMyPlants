@@ -4,11 +4,26 @@
 
 Projeto em construção, documentado desde o primeiro sensor conectado: componentes, ligações, firmware, experimentos, resultados e modelos físicos. A proposta é acompanhar várias plantas pelo celular e automatizar a rega conforme as condições de cada vaso.
 
-## Experimente o painel
+## MVP 0.1.0 — painel independente
 
-[Abrir WaterMyPlants — demonstração privada](https://watermyplants-picolii.picoli-b.chatgpt.site). Acesso pelo ChatGPT do proprietário. Cadastro, detalhes, QR Codes e anotações funcionam localmente no navegador; plantas iniciais, índices e gráficos são exemplos. Sem conexão com ESP32, câmera ou banco nesta versão. [Código e execução local](web/painel/README.md).
+O painel está integralmente neste repositório, em [`web/painel`](web/painel/README.md), e funciona sem plataforma de geração de sites, conta ou login externo. HTML, CSS e JavaScript separados, com servidor local em Node.js e sem dependências npm de execução.
 
-O deploy foi confirmado pelo serviço; a conferência do login hospedado encontrou um erro no navegador interno. A interface foi validada na prévia local. Detalhes em [T005](docs/testes/T005-painel-demo.md).
+Na raiz do projeto, com Node.js 20 ou superior:
+
+```sh
+npm start
+```
+
+Abra [http://127.0.0.1:4178](http://127.0.0.1:4178). Não é necessário instalar pacotes para iniciar esta versão. Para verificar o código e executar os testes:
+
+```sh
+npm run check
+npm test
+```
+
+Cadastro, edição, filtros, QR Codes, anotações e exportação funcionam no navegador. Os cadastros usam armazenamento local; as plantas iniciais, os índices e os gráficos são demonstrativos. Não há conexão do painel com ESP32, câmera, IA ou banco nesta versão.
+
+Para hospedar em um domínio próprio ou serviço de sua escolha, publique **somente `web/painel/dist/`** em um servidor estático. Os QR Codes usam automaticamente o endereço em que o painel estiver aberto, inclusive em subpastas. Esta entrega é o código independente e versionado; nenhuma nova hospedagem externa foi contratada/configurada. [Notas da primeira versão](CHANGELOG.md).
 
 ## O que já funciona
 

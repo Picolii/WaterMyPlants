@@ -63,6 +63,10 @@ O autor informou que o teste funcionou: "Deu certo subiu tudo". Esse retorno con
 
 Em 20/10/2026 foi criado um painel de demonstração próximo à visão final, com identidade do WaterMyPlants, cadastro de plantas, filtros, detalhes, QR Code e registro local de regas. Dados ilustrativos separados dos dados físicos. Código em `web/painel` e procedimento/resultados em [T005-painel-demo.md](testes/T005-painel-demo.md). Interface verificada no navegador; avaliação do autor e conexão a backend ainda pendentes.
 
+## T006 — MVP independente
+
+Após aprovação do visual pelo autor, o painel foi preparado como versão MVP 0.1.0 do repositório: execução com `npm start`, hospedagem estática independente e QR Codes baseados no endereço da instalação atual. O visual foi preservado. Documentação e testes em [T006-mvp-independente.md](testes/T006-mvp-independente.md); escopo da versão em [CHANGELOG.md](../CHANGELOG.md).
+
 ## Próximo experimento
 
 Definir e integrar API/banco com o ESP32 e o painel. Registrar configurações sem credenciais, amostras persistidas e testes de dados antigos/offline. Finalizar os cenários de falha do [T004](testes/T004-wifi-local.md).
