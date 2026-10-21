@@ -55,6 +55,14 @@ Os resultados abaixo foram relatados pelo autor durante os testes físicos em 19
 - Análise futura de fotos e histórico para sugerir hipóteses sobre problemas.
 - Arquitetura expansível além do relé de dois canais atual.
 
+## T004 — Retorno do autor
+
+O autor informou que o teste funcionou: "Deu certo subiu tudo". Esse retorno confirma o funcionamento geral da versão com Wi-Fi e página local; não foram enviados logs de conexão nem resultados separados dos casos de queda de rede. A reconexão e os demais cenários de falha continuam pendentes.
+
+## T005 — Primeiro painel personalizado
+
+Em 20/10/2026 foi criado um painel de demonstração próximo à visão final, com identidade do WaterMyPlants, cadastro de plantas, filtros, detalhes, QR Code e registro local de regas. Dados ilustrativos separados dos dados físicos. Código em `web/painel` e procedimento/resultados em [T005-painel-demo.md](testes/T005-painel-demo.md). Interface verificada no navegador; avaliação do autor e conexão a backend ainda pendentes.
+
 ## Próximo experimento
 
-T004 preparado: conexão Wi-Fi e página local de leitura no celular, antes de integrar telemetria na nuvem. O autor confirmou rede de 2,4 GHz disponível. Credenciais em arquivo local ignorado pelo Git; leitura serial preservada e amostragem por temporização sem espera por conexão. Procedimento e casos de falha em [T004-wifi-local.md](testes/T004-wifi-local.md). Teste físico pendente; nenhum resultado de conectividade foi informado ainda. Persistência no backend será teste posterior.
+Definir e integrar API/banco com o ESP32 e o painel. Registrar configurações sem credenciais, amostras persistidas e testes de dados antigos/offline. Finalizar os cenários de falha do [T004](testes/T004-wifi-local.md).

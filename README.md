@@ -4,6 +4,12 @@
 
 Projeto em construção, documentado desde o primeiro sensor conectado: componentes, ligações, firmware, experimentos, resultados e modelos físicos. A proposta é acompanhar várias plantas pelo celular e automatizar a rega conforme as condições de cada vaso.
 
+## Experimente o painel
+
+[Abrir WaterMyPlants — demonstração privada](https://watermyplants-picolii.picoli-b.chatgpt.site). Acesso pelo ChatGPT do proprietário. Cadastro, detalhes, QR Codes e anotações funcionam localmente no navegador; plantas iniciais, índices e gráficos são exemplos. Sem conexão com ESP32, câmera ou banco nesta versão. [Código e execução local](web/painel/README.md).
+
+O deploy foi confirmado pelo serviço; a conferência do login hospedado encontrou um erro no navegador interno. A interface foi validada na prévia local. Detalhes em [T005](docs/testes/T005-painel-demo.md).
+
 ## O que já funciona
 
 - [x] ESP32 conectado ao computador por microUSB.
@@ -93,7 +99,9 @@ O módulo atual tem dois canais de relé, mas há apenas um sensor e uma bomba d
 
 ## Próxima etapa
 
-Validar o firmware de Wi-Fi e a página local no celular seguindo o [T004](docs/testes/T004-wifi-local.md). Depois definir a API e o armazenamento das leituras e construir o painel por planta, com histórico e estado de conexão. O controle da bomba será testado depois de confirmar alimentação, corrente e compatibilidade do relé.
+Já há um [painel personalizado de demonstração](web/painel/README.md), com cadastro por planta, busca, QR Codes e linha do tempo local. Seus índices e gráficos são ilustrativos, ainda sem conexão com o ESP32. O desenvolvimento e os testes estão registrados no [T005](docs/testes/T005-painel-demo.md).
+
+O autor confirmou o funcionamento do teste Wi-Fi e da página local do [T004](docs/testes/T004-wifi-local.md); os casos de falha/reconexão ainda precisam de resultados. O próximo passo de integração é definir a API e o armazenamento das leituras e conectar o painel aos dados reais. O controle da bomba será testado depois de confirmar alimentação, corrente e compatibilidade do relé.
 
 ## Referências técnicas
 

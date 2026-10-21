@@ -1,6 +1,6 @@
 # T004 — Wi-Fi e leitura pelo celular
 
-Estado: firmware preparado; teste físico pendente. Nesta etapa não há API na nuvem, banco, histórico persistente ou bomba conectada.
+Estado: autor confirmou funcionamento geral do Wi-Fi/página local; resultados específicos de falha e reconexão ainda pendentes. Nesta etapa não há API na nuvem, banco, histórico persistente ou bomba conectada.
 
 ## Verificação de desenvolvimento — 19/10/2026
 
